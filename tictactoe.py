@@ -18,9 +18,8 @@ class TicTacToe:
 		self.player = player
 		self.opp = Player("AI", "O")
 		self.board = [[ "_" for x in range(3)] for y in range(3)]
-		self.over = False
 		self.turn = 'Player'
-		self.winner = ''
+		self.status = 'Draw'
 
 	def printBoard(self):
 		for row in range(len(self.board)):
@@ -31,7 +30,7 @@ class TicTacToe:
 
 	def startGame(self):
 		
-		while not self.gameOver(self.opp.symbol):
+		while self.gameOver(self.opp.symbol) == False and len(self.allPossibleMoves()) != 0:
 			self.printBoard()
 
 			allMoves = self.allPossibleMoves()
@@ -40,14 +39,21 @@ class TicTacToe:
 				print("{}'s turn!".format(self.player.name))
 
 				while True:
-					row = input
+					row = (input("{}, enter row of your move : ".format(self.player.name)))
+					col = (input("{}, enter col of your move : ".format(self.player.name)))
 
+					try:
+						row = int(row)
+						col = int(col)
+					except ValueError:
+						print('Please enter valid row and column')
+						continue
 
-				row = int(input("{}, enter row of your move : ".format(self.player.name)))
-				col = int(input("{}, enter col of your move : ".format(self.player.name)))
-
-				if [row, col] in allMoves:
-					self.makeMove(self.player.symbol, Move(row,col))
+					if [row,col] in allMoves:
+						self.makeMove(self.player.symbol, Move(row,col))
+						break
+					else:
+						print('Please enter a valid and open move')
 
 			else:
 				print()
@@ -56,6 +62,13 @@ class TicTacToe:
 				self.makeMove(self.opp.symbol, Move(move[0],move[1]))
 
 			self.turn = "Player" if self.turn == "Opp" else "Opp"
+
+		self.printBoard()
+
+		if self.gameOver(self.opp.symbol):
+			print('AI has won :) ')
+		else:
+			print('The match is a draw!')
 
 
 	def allPossibleMoves(self):
@@ -68,6 +81,7 @@ class TicTacToe:
 		return allMoves
 
 	def gameOver(self,symbol):
+		#rows, cols, and diagonals
 		allWinScenarios = [
 	        [self.board[0][0], self.board[0][1], self.board[0][2]],
 	        [self.board[1][0], self.board[1][1], self.board[1][2]],
@@ -80,6 +94,7 @@ class TicTacToe:
 	    ]
 
 		if [symbol,symbol,symbol] in allWinScenarios:
+			self.status = "Win"
 			return True
 		else:
 			return False
@@ -101,10 +116,7 @@ class TicTacToe:
 	def minmax(self, depth, p):
 		symbol = 'O' if p == 1 else 'X'
 
-		if p == 1:
-			nextMove = [-1,-1,float('-inf')]
-		else:
-			nextMove = [-1,-1,float('inf')]
+		nextMove = [-1,-1,float('-inf')] if p == 1 else [-1,-1,float('inf')]
 
 		if depth == 0 or self.gameOverHelper():
 			score = self.score()
@@ -132,7 +144,10 @@ class TicTacToe:
 					nextMove = score
 		return nextMove
 
+def main():
+	player = Player("Player", "X")
+	board = TicTacToe(player)
+	board.startGame()
 
-p = Player("Jalaj", "X")
-board = TicTacToe(p)
-board.startGame()
+if __name__ == '__main__':
+	main()
