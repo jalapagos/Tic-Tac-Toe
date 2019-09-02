@@ -21,13 +21,6 @@ class TicTacToe:
 		self.turn = 'Player'
 		self.status = 'Draw'
 
-	def printBoard(self):
-		for row in range(len(self.board)):
-			currRow = ''
-			for col in range(len(self.board[0])):
-				currRow += ' '+self.board[row][col]
-			print(currRow)
-
 	def startGame(self):
 		
 		while self.gameOver(self.opp.symbol) == False and len(self.allPossibleMoves()) != 0:
@@ -58,7 +51,7 @@ class TicTacToe:
 			else:
 				print()
 				print("{}'s turn!".format(self.opp.name))
-				move = self.minmax(len(self.allPossibleMoves()), 1)
+				move = self.minmax(len(self.allPossibleMoves()), self.opp.symbol)
 				self.makeMove(self.opp.symbol, Move(move[0],move[1]))
 
 			self.turn = "Player" if self.turn == "Opp" else "Opp"
@@ -113,10 +106,8 @@ class TicTacToe:
 	def makeMove(self, symbol, move):
 		self.board[move.row][move.col] = symbol
 
-	def minmax(self, depth, p):
-		symbol = 'O' if p == 1 else 'X'
-
-		nextMove = [-1,-1,float('-inf')] if p == 1 else [-1,-1,float('inf')]
+	def minmax(self, depth, symbol):
+		bestMove = [-1,-1,float('-inf')] if symbol == "O" else [-1,-1,float('inf')]
 
 		if depth == 0 or self.gameOverHelper():
 			score = self.score()
@@ -129,23 +120,36 @@ class TicTacToe:
 			col = move[1]
 
 			self.board[row][col] = symbol
-			score = self.minmax(depth - 1, -p)
+
+			nextTurn = "X" if symbol == "O" else "O"
+			score = self.minmax(depth - 1, nextTurn)
 			self.board[row][col] = '_'
 			score[0] = row
 			score[1] = col
 
-			if p == 1:
+			if symbol == "O":
 
-				if score[2] > nextMove[2]:
-					nextMove = score
+				if score[2] > bestMove[2]:
+					bestMove = score
 					
 			else:
-				if score[2] < nextMove[2]:
-					nextMove = score
-		return nextMove
+				if score[2] < bestMove[2]:
+					bestMove = score
+		return bestMove
+
+	def printBoard(self):
+		for row in range(len(self.board)):
+			currRow = ''
+			for col in range(len(self.board[0])):
+				currRow += ' '+self.board[row][col]
+			print(currRow)
 
 def main():
-	player = Player("Player", "X")
+	playerName = (input("What is your name? : "))
+	print('The game is about to begin. Get ready to play the AI, {}!'.format(playerName))
+	print()
+	print('The board is zero indexed.')
+	player = Player(playerName, "X")
 	board = TicTacToe(player)
 	board.startGame()
 
